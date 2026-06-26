@@ -1,7 +1,7 @@
 {
   "name": "claude-telegram-bot",
   "version": "1.0.0",
-  "description": "Telegram bot powered by the Claude Agent SDK with text + voice (ElevenLabs Scribe) input, running as a remote interface to Claude on a Windows host.",
+  "description": "Claude Code Telegram Remote Agent — control Claude Code on a Windows host from Telegram, with text + voice (ElevenLabs Scribe) input, screenshots, and optional browser automation.",
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
