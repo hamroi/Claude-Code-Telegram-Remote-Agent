@@ -1,0 +1,26 @@
+{
+  "name": "claude-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot powered by the Claude Agent SDK with text + voice (ElevenLabs Scribe) input, running as a remote interface to Claude on a Windows host.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "serve": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.187",
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^1.1.1"
+  },
+  "optionalDependencies": {
+    "@playwright/mcp": "^0.0.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+*.log
+.sessions.json
+.mcp-chrome-config.json
+.chrome-profile/
+.playwright-mcp/
+
+# local cruft / personal artifacts
+telegram.png
+test.txt
