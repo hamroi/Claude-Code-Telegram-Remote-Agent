@@ -106,17 +106,59 @@ ELEVENLABS_API_KEY=                                        # from Step 6 (leave 
 > 🔐 **Keep `.env` secret.** It holds your private keys. It is already in
 > `.gitignore`, so it will **never** be uploaded to GitHub.
 
-### Step 8 — Connect Claude
+### Step 8 — Install Claude Code and log in
 
-The bot uses the Claude Agent SDK, which needs access to Claude. Pick **one**:
+Claude Code is the engine this bot drives. You install it **once** on your PC and
+log in; the bot then reuses that login automatically. *(Already have Claude Code
+installed and logged in? Skip to Step 9.)*
 
-- **Easiest:** if you already use **Claude Code** on this PC and are logged in,
-  you're done — the bot reuses that login automatically.
-- **Or** add an API key to your `.env`:
+> 💳 **Account needed:** Claude Code requires a paid **Claude Pro / Max / Team /
+> Enterprise** plan, or an **Anthropic Console** (pay-as-you-go) account. The free
+> Claude.ai plan does not include Claude Code.
 
-  ```ini
-  ANTHROPIC_API_KEY=sk-ant-...
-  ```
+**8.1 — Install it**
+
+The simplest method (uses the Node.js from Step 1):
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+> Alternatives if you prefer not to use npm — run **one** of these in PowerShell:
+> - Native installer (recommended by Anthropic): `irm https://claude.ai/install.ps1 | iex`
+> - WinGet: `winget install Anthropic.ClaudeCode`
+
+**8.2 — Verify the install**
+
+```bash
+claude --version
+```
+
+You should see a version number (e.g. `2.1.x`). If it says *command not found*,
+close and reopen PowerShell and try again.
+
+**8.3 — Log in**
+
+Run Claude Code once and follow the prompts:
+
+```bash
+claude
+```
+
+It opens your browser to sign in. Log in with your Claude (Pro/Max) account or
+your Anthropic Console account. When it's done, return to the terminal and type
+`/exit` to quit. ✅ The bot will now use this login automatically — no API key needed.
+
+> 🔑 **Prefer an API key instead of logging in?** Skip 8.3 and add this to your
+> `.env` instead:
+>
+> ```ini
+> ANTHROPIC_API_KEY=sk-ant-...
+> ```
+>
+> Get a key from <https://console.anthropic.com> → **API Keys**.
+
+📚 Full Claude Code install docs: <https://code.claude.com/docs/en/setup>
 
 ### Step 9 — Start the bot
 
