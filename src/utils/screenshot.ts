@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
 import os from "node:os";
 import path from "node:path";
 import { createLogger } from "./logger.js";
@@ -7,10 +8,23 @@ import { createLogger } from "./logger.js";
 const execFileAsync = promisify(execFile);
 const log = createLogger("screenshot");
 
+const here = path.dirname(fileURLToPath(import.meta.url));
+
 /**
- * Capture the whole Windows desktop (all monitors) to a PNG and return its path.
- * Uses PowerShell + .NET (System.Windows.Forms / System.Drawing) so there's no
- * native npm dependency. Windows-only.
+ * Absolute path to the bundled PowerShell capture script. Resolves from this
+ * module to the repo root (works for both tsx/src and compiled dist layouts),
+ * since `scripts/` lives at the project root. Shared by the /screenshot command
+ * and Claude's system prompt so both produce identical full-screen captures.
+ */
+export function screenshotScriptPath(): string {
+  return path.resolve(here, "..", "..", "scripts", "screenshot.ps1");
+}
+
+/**
+ * Capture the whole Windows desktop (all monitors, full resolution) to a PNG and
+ * return its path. Delegates to scripts/screenshot.ps1, which is DPI-aware so
+ * scaled displays are captured in full rather than just the top-left region.
+ * Windows-only; no native npm dependency.
  */
 export async function captureDesktop(): Promise<string> {
   if (process.platform !== "win32") {
@@ -19,20 +33,18 @@ export async function captureDesktop(): Promise<string> {
 
   const outFile = path.join(os.tmpdir(), `tg-claude-shot-${process.pid}-${hrtag()}.png`);
 
-  // Single PowerShell script: grab the virtual screen bounds, copy pixels, save PNG.
-  const script = [
-    "Add-Type -AssemblyName System.Windows.Forms,System.Drawing;",
-    "$b = [System.Windows.Forms.SystemInformation]::VirtualScreen;",
-    "$bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height;",
-    "$g = [System.Drawing.Graphics]::FromImage($bmp);",
-    "$g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size);",
-    `$bmp.Save('${outFile.replace(/\\/g, "\\\\")}', [System.Drawing.Imaging.ImageFormat]::Png);`,
-    "$g.Dispose(); $bmp.Dispose();",
-  ].join(" ");
-
   await execFileAsync(
     "powershell.exe",
-    ["-NoProfile", "-NonInteractive", "-Command", script],
+    [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      screenshotScriptPath(),
+      "-OutFile",
+      outFile,
+    ],
     { windowsHide: true, timeout: 20_000 },
   );
 
@@ -40,7 +52,7 @@ export async function captureDesktop(): Promise<string> {
   return outFile;
 }
 
-/** Short, monotonic-ish tag for unique filenames without Math.random/Date deps elsewhere. */
+/** Short, monotonic-ish tag for unique filenames without Math.random/Date deps. */
 function hrtag(): string {
   return process.hrtime.bigint().toString(36);
 }

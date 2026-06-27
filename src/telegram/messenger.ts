@@ -61,6 +61,13 @@ export class Messenger {
     });
   }
 
+  /** Send a document from a local file path. */
+  async sendDocument(chatId: number, filePath: string, caption?: string): Promise<void> {
+    await this.bot.sendDocument(chatId, filePath, {
+      caption: caption ? caption.slice(0, 1024) : undefined,
+    });
+  }
+
   /** Send a one-button-per-row inline keyboard. */
   async sendButtons(
     chatId: number,

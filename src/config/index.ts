@@ -49,6 +49,10 @@ export const CONFIG = {
   sessionsFile:
     process.env.SESSIONS_FILE ||
     `${process.env.CLAUDE_WORKDIR || process.cwd()}/.sessions.json`,
+  /** Folder where files sent to the bot are saved so Claude can work with them. */
+  downloadsDir:
+    process.env.DOWNLOADS_DIR ||
+    `${process.env.CLAUDE_WORKDIR || process.cwd()}/telegram-downloads`,
   /** Minimum log level to emit: debug < info < warn < error. */
   logLevel: process.env.LOG_LEVEL || "info",
   /** Enable the optional Playwright browser-automation tools for Claude. */

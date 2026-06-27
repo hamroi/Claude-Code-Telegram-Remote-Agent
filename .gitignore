@@ -6,6 +6,7 @@ dist/
 .mcp-chrome-config.json
 .chrome-profile/
 .playwright-mcp/
+telegram-downloads/
 
 # local cruft / personal artifacts
 telegram.png

@@ -3,6 +3,7 @@ import { MODELS, type Mode, type ModelKey } from "../config/index.js";
 import { createLogger } from "../utils/logger.js";
 import type { ChatState } from "../sessions/index.js";
 import { mcpServers } from "./tools/browser.js";
+import { screenshotScriptPath } from "../utils/screenshot.js";
 
 const log = createLogger("claude");
 
@@ -32,8 +33,14 @@ const SYSTEM_APPEND =
   "and suitable for a chat client. For destructive or irreversible actions, confirm intent first. " +
   "To send an image, screenshot, or chart to the user, save it to a file and include a line " +
   "of the exact form [[image: C:\\full\\path\\to\\file.png]] in your reply — each such line is " +
-  "delivered to the user as a photo and removed from the visible text. To screenshot the desktop, " +
-  "use PowerShell with System.Windows.Forms/System.Drawing to save a PNG, then emit its [[image: ...]] marker.";
+  "delivered to the user as a photo and removed from the visible text. To take a DESKTOP SCREENSHOT, " +
+  "do NOT write your own capture code (ad-hoc code misses part of the screen on scaled displays). " +
+  `Instead run this exact, DPI-aware, full-screen (all monitors) script: powershell -NoProfile ` +
+  `-ExecutionPolicy Bypass -File "${screenshotScriptPath()}" -OutFile "<OUT.png>" where <OUT.png> is a ` +
+  "writable path (e.g. in the temp folder), then emit [[image: <OUT.png>]] with that same path. " +
+  "To send any other file (document, archive, log, code, PDF, etc.) to the user, include a line of the exact " +
+  "form [[file: C:\\full\\path\\to\\file.ext]] — each such line is delivered as a Telegram document and removed " +
+  "from the visible text. Use [[image: ...]] for pictures you want shown inline, and [[file: ...]] for everything else.";
 
 /** Trim a streaming answer to a tail that fits comfortably in a Telegram edit. */
 function streamPreview(text: string, max = 3500): string {

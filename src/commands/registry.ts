@@ -182,7 +182,8 @@ const helpCmd: Command = {
     const lines = [
       "🤖 *Claude Telegram Agent*",
       "",
-      "Send a text or voice message and I'll run it through Claude on this machine.",
+      "Send a text, voice, or file (document/photo) and I'll run it through Claude on this machine.",
+      "Tip: attach a file with a caption like \"summarize this\" and I'll read it.",
       "",
       "*Commands:*",
       ...[...commands, helpCmd].map((c) => `/${c.name} — ${c.description}`),
