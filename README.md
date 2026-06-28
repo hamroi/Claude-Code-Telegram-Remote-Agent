@@ -15,8 +15,9 @@ right in the chat. It's powered by the official
 - 📝 **Text** and 🎙️ **voice** messages — voice is transcribed by **ElevenLabs Scribe**.
 - ⚡ **Fast** — keeps a warm Claude process per chat, so replies don't pay a cold start every time.
 - 💬 **Live replies** — you watch the answer appear as Claude writes it.
-- 🖥️ **Screenshots & images** — `/screenshot` sends your desktop; Claude can send any image it creates.
-- 🌐 **Browser automation** (optional) — Claude can drive a real Chrome browser.
+- 🖥️ **Screenshots & images** — `/screenshot` sends your **full** desktop (DPI-aware, all monitors); Claude can send any image it creates.
+- 📎 **Files both ways** — send a file *to* the bot and Claude reads it; Claude can send any file *back* (documents, logs, archives, …).
+- 🌐 **Browser automation** (optional) — Claude can drive a real Chrome browser with full control (forms, tabs, uploads, clipboard, …).
 - 🧠 **Memory** — conversations continue across messages and survive a restart.
 - 🔒 **Private** — only *your* Telegram chat is accepted; everyone else is ignored.
 - 🛠️ **Full machine access** — files, shell (PowerShell/CMD), npm, Node.js, multiple projects.
@@ -47,8 +48,8 @@ This bot runs on Node.js version **20 or newer**.
 If you have **Git** installed:
 
 ```bash
-git clone https://github.com/hamroi/claude-telegram-bot.git
-cd claude-telegram-bot
+git clone https://github.com/hamroi/Claude-Code-Telegram-Remote-Agent.git
+cd Claude-Code-Telegram-Remote-Agent
 ```
 
 No Git? Open the repo page, click the green **Code → Download ZIP** button,
@@ -176,7 +177,8 @@ Open your bot in Telegram and send a message like:
 > What's my computer's name and current time?
 
 Claude will run it on your machine and reply. 🎉
-Send a 🎙️ voice note to test transcription, or `/screenshot` to get a picture of your desktop.
+Send a 🎙️ voice note to test transcription, `/screenshot` to get a picture of
+your desktop, or attach a 📎 file with a caption like *"summarize this"*.
 
 ---
 
@@ -192,6 +194,7 @@ All settings live in `.env` (template: `.env.example`).
 | `ELEVENLABS_STT_MODEL`     |    ❌    | Scribe model id (default: `scribe_v2`)                          |
 | `CLAUDE_WORKDIR`           |    ❌    | Folder Claude's tools operate in (default: where you launch it) |
 | `SESSIONS_FILE`            |    ❌    | Session save file (default: `<workdir>/.sessions.json`)         |
+| `DOWNLOADS_DIR`            |    ❌    | Where files you send the bot are saved (default: `<workdir>/telegram-downloads`) |
 | `LOG_LEVEL`                |    ❌    | `debug` \| `info` \| `warn` \| `error` (default: `info`)        |
 | `ANTHROPIC_API_KEY`        |    ❌    | Only if you're not logged into Claude Code                      |
 | `BROWSER_ENABLED`          |    ❌    | `true` to give Claude browser tools (default: off)              |
@@ -254,31 +257,39 @@ pm2 save                          # restart automatically after reboot
 
 ---
 
-## 🧩 How it sends images
+## 🧩 Sending & receiving files
 
-Claude can deliver any image to your chat by writing a marker line in its reply:
+**Claude → you.** Claude delivers images and files by writing a marker line in its reply:
 
 ```
-[[image: C:\path\to\file.png]]
+[[image: C:\path\to\picture.png]]     ← sent as a Telegram photo (shown inline)
+[[file:  C:\path\to\report.pdf]]      ← sent as a Telegram document
 ```
 
-The bot detects it, sends the file as a Telegram photo, and removes the marker
-from the text. So you can ask things like *"take a screenshot and send it"* or
-*"make a chart of this data and send the picture"* and it just works.
+The bot detects these, delivers each file, and strips the marker from the text.
+So you can ask *"take a screenshot and send it"*, *"make a chart and send the
+picture"*, or *"zip the logs and send me the file"* and it just works.
+
+**You → Claude.** Send any file (document, photo, video, audio) to the bot and
+it's saved on your PC under `telegram-downloads/` (configurable via
+`DOWNLOADS_DIR`). The file's path is handed to Claude, and your **caption**
+becomes the instruction — e.g. attach a PDF with the caption *"summarize this"*.
 
 ---
 
 ## 📁 Project structure
 
 ```
+scripts/
+  screenshot.ps1   DPI-aware full-screen capture (all monitors)
 src/
   config/      reads .env, model list, permission modes
-  telegram/    bot wiring (thin adapter) + message sending/editing
+  telegram/    bot wiring (thin adapter) + message sending/editing + file uploads
   claude/      Claude Agent SDK wrapper (warm sessions) + optional browser tools
   voice/       ElevenLabs Scribe transcription
   commands/    command registry (/model, /mode, /new, /screenshot, …)
   sessions/    per-chat state saved to disk
-  utils/       logger, screenshots, image markers, text splitting
+  utils/       logger, screenshots, image/file markers, text splitting
   index.ts     entry point
 ```
 
@@ -306,9 +317,12 @@ without rewrites.
   background service or over a disconnected Remote Desktop session, the screen
   can come out black. Run it in a normal logged-in session.
 
-**Browser tools don't work.**
+**Browser tools don't work, or commands run only partway.**
 - Set `BROWSER_ENABLED=true` in `.env`, then enable per chat with `/browser on`.
-  To use a real Chrome profile, **close all Chrome windows first**.
+- Make sure you're in **`/mode bypassPermissions`** — in `plan`/`auto` Claude won't
+  run the browser actions to completion.
+- To use a real Chrome profile, **close all Chrome windows first**, then `/profile <name>`.
+- After changing any of the above, send `/new` so a fresh browser session picks them up.
 
 **Replies feel slow.**
 - The first message after starting is slower (one-time warm-up). Use `/model haiku`
