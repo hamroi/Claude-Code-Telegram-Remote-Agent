@@ -1,5 +1,7 @@
 # Claude Code Telegram Remote Agent
 
+🌐 Language: **English** · [فارسی](README.fa.md)
+
 Control **Claude Code** on your Windows PC from anywhere using **Telegram**.
 
 Send a message (text **or** voice) to your Telegram bot, and Claude runs it
